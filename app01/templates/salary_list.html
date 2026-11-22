@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+{% load rbac %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    {% has_perm request 'salary_add' as can_add %}
+    {% if can_add %}
+    <a href="/salary/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus"></span> 薪资录入
+    </a>
+    {% endif %}
+</div>
+
+<!-- 月份 / 员工筛选 -->
+<form method="get" class="form-inline" style="margin-bottom: 12px;">
+    <div class="form-group">
+        <input type="month" name="month" value="{{ month }}" class="form-control" placeholder="月份">
+    </div>
+    <div class="form-group">
+        <select name="user" class="form-control">
+            <option value="0">全部员工</option>
+            {% for u in user_list %}
+            <option value="{{ u.id }}" {% if u.id == user_id %}selected{% endif %}>{{ u.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-filter"></span> 筛选
+    </button>
+    <a href="/salary/list/" class="btn btn-default">重置</a>
+</form>
+
+<div class="panel panel-default">
+    <div class="panel-heading">薪资记录</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>员工</th>
+                <th>月份</th>
+                <th>基本工资</th>
+                <th>绩效</th>
+                <th>补贴</th>
+                <th>扣款</th>
+                <th>实发工资</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.user.name }}</td>
+                <td>{{ obj.month }}</td>
+                <td>{{ obj.base|mask_money }}</td>
+                <td>{{ obj.performance|mask_money }}</td>
+                <td>{{ obj.allowance|mask_money }}</td>
+                <td>{{ obj.deduction|mask_money }}</td>
+                <td style="font-weight:bold;color:#d9534f;">{{ obj.actual|mask_money }}</td>
+                <td>
+                    {% has_perm request 'salary_edit' as can_edit %}
+                    {% if can_edit %}
+                    <a href="/salary/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    {% endif %}
+                    {% has_perm request 'salary_delete' as can_delete %}
+                    {% if can_delete %}
+                    <a href="/salary/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="panel-footer" style="font-weight:bold;">
+        当前筛选范围实发工资合计：<span style="color:#d9534f;">{{ total_actual|mask_money }}</span> 元
+    </div>
+    <div style="text-align: center;">
+        {{ page_html }}
+    </div>
+</div>
+{% endblock %}

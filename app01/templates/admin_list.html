@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    <a href="/admin/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus"></span> 新建管理员
+    </a>
+    <form class="form-inline pull-right" method="get">
+        <div class="form-group">
+            <input type="text" class="form-control" name="q" placeholder="关键字" value="{{ q }}">
+        </div>
+        <button type="submit" class="btn btn-default">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+    </form>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">管理员列表</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>密码</th>
+                <th>重置密码</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.username }}</td>
+                <td>********</td>
+                <td>
+                    <a href="/admin/{{ obj.id }}/reset/">重置密码</a>
+                </td>
+                <td>
+                    <a href="/admin/{{ obj.id }}/role/" class="btn btn-info btn-xs">分配角色</a>
+                    <a href="/admin/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    <a href="/admin/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        {{ page_html }}
+    </div>
+</div>
+{% endblock %}

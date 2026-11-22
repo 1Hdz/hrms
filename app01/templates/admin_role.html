@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+<style>
+    #id_roles { height: 180px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">给管理员「{{ row.username }}」分配角色</h3>
+        </div>
+        <div class="panel-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        <span style="color: red;">{{ field.errors.0 }}</span>
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">保 存</button>
+                <a href="/admin/list/" class="btn btn-default">返 回</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

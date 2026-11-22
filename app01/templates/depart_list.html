@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% load rbac %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    {% has_perm request 'depart_add' as can_add %}
+    {% if can_add %}
+    <a href="/depart/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus"></span> 新建部门
+    </a>
+    {% endif %}
+</div>
+
+<!-- 第17章：Excel 批量导入（新增，不影响上方原有内容） -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <span class="glyphicon glyphicon-upload"></span> 批量上传部门（Excel）
+    </div>
+    <div class="panel-body">
+        <form method="post" enctype="multipart/form-data" action="/depart/multi/">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 8px;">
+                <input type="file" name="exc" required>
+            </div>
+            <input type="submit" value="上传并导入" class="btn btn-info btn-sm">
+            <span class="help-block" style="margin-bottom:0;">Excel 第一列从第 2 行起写部门名，重复名称不会重复插入。</span>
+        </form>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <span class="glyphicon glyphicon-th-list"></span> 部门列表
+    </div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.title }}</td>
+                <td>
+                    {% has_perm request 'depart_edit' as can_edit %}
+                    {% if can_edit %}
+                    <a href="/depart/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    {% endif %}
+                    {% has_perm request 'depart_delete' as can_delete %}
+                    {% if can_delete %}
+                    <a href="/depart/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

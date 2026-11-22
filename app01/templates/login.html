@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录 · 企业员工管理系统</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <style>
+        *{box-sizing:border-box;}
+        body{
+            margin:0;min-height:100vh;
+            font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Segoe UI",sans-serif;
+            background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0ea5e9 100%);
+            display:flex;align-items:center;justify-content:center;
+            padding:30px 16px;position:relative;overflow:hidden;
+        }
+        /* 背景装饰圆 */
+        body::before,body::after{
+            content:"";position:absolute;border-radius:50%;
+            background:rgba(255,255,255,.08);
+        }
+        body::before{width:340px;height:340px;top:-120px;left:-100px;}
+        body::after{width:420px;height:420px;bottom:-160px;right:-120px;}
+
+        .login-wrap{
+            display:flex;width:860px;max-width:100%;min-height:480px;
+            background:#fff;border-radius:20px;overflow:hidden;
+            box-shadow:0 25px 60px rgba(15,23,42,.35);position:relative;z-index:1;
+        }
+        /* 左侧品牌区 */
+        .brand-side{
+            flex:1;background:linear-gradient(160deg,#1d4ed8,#0ea5e9);
+            color:#fff;padding:46px 38px;display:flex;flex-direction:column;justify-content:center;
+        }
+        .brand-side .logo{
+            width:58px;height:58px;border-radius:15px;background:rgba(255,255,255,.18);
+            display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:24px;
+        }
+        .brand-side h2{font-size:25px;margin:0 0 14px;font-weight:700;line-height:1.4;}
+        .brand-side p{font-size:14px;line-height:1.9;opacity:.9;margin:0 0 10px;}
+        .brand-side ul{padding-left:18px;margin:14px 0 0;font-size:13.5px;opacity:.92;}
+        .brand-side li{margin-bottom:8px;}
+
+        /* 右侧表单区 */
+        .form-side{flex:1;padding:44px 42px;display:flex;flex-direction:column;justify-content:center;}
+        .form-side h3{margin:0 0 6px;font-size:22px;color:#1e293b;font-weight:700;}
+        .form-side .sub{color:#64748b;font-size:13.5px;margin:0 0 28px;}
+
+        .field{margin-bottom:18px;}
+        .field label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:7px;}
+        .input-wrap{position:relative;}
+        .input-wrap .glyphicon{
+            position:absolute;left:14px;top:50%;transform:translateY(-50%);
+            color:#94a3b8;font-size:15px;
+        }
+        .input-wrap input,
+        .input-wrap .form-control{
+            width:100%;height:44px;border:1px solid #e2e8f0;border-radius:10px;
+            padding:0 14px 0 42px;font-size:14px;color:#1e293b;
+            transition:border-color .15s,box-shadow .15s;box-shadow:none;
+        }
+        .input-wrap input:focus,.input-wrap .form-control:focus{
+            border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.14);outline:none;
+        }
+        .err{color:#ef4444;font-size:12.5px;margin-top:5px;display:block;}
+
+        .code-row{display:flex;gap:10px;align-items:flex-start;}
+        .code-row .input-wrap{flex:1;}
+        .code-row img{
+            width:120px;height:44px;border-radius:10px;cursor:pointer;
+            border:1px solid #e2e8f0;flex:none;background:#f8fafc;
+        }
+
+        .btn-login{
+            width:100%;height:46px;border:none;border-radius:10px;margin-top:8px;
+            background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff;
+            font-size:16px;font-weight:600;letter-spacing:4px;cursor:pointer;
+            transition:all .18s;box-shadow:0 8px 18px rgba(37,99,235,.32);
+        }
+        .btn-login:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(37,99,235,.4);}
+        .btn-login:active{transform:translateY(0);}
+
+        @media (max-width:760px){
+            .brand-side{display:none;}
+            .form-side{padding:36px 28px;}
+            .login-wrap{width:100%;max-width:420px;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+    <!-- 左侧品牌介绍 -->
+    <div class="brand-side">
+        <div class="logo"><span class="glyphicon glyphicon-briefcase"></span></div>
+        <h2>企业员工<br>管理系统</h2>
+        <p>部门、员工、考勤、薪资、公告、任务一站式管理</p>
+        <ul>
+            <li>角色权限控制，安全可靠</li>
+            <li>密码加密存储，放心登录</li>
+            <li>自动核算考勤与工资</li>
+        </ul>
+    </div>
+
+    <!-- 右侧登录表单 -->
+    <div class="form-side">
+        <h3>欢迎登录</h3>
+        <p class="sub">请输入您的账号信息</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="field">
+                <label>用户名</label>
+                <div class="input-wrap">
+                    <span class="glyphicon glyphicon-user"></span>
+                    {{ form.username }}
+                </div>
+                <span class="err">{{ form.username.errors.0 }}</span>
+            </div>
+            <div class="field">
+                <label>密码</label>
+                <div class="input-wrap">
+                    <span class="glyphicon glyphicon-lock"></span>
+                    {{ form.password }}
+                </div>
+                <span class="err">{{ form.password.errors.0 }}</span>
+            </div>
+            <div class="field">
+                <label>图片验证码</label>
+                <div class="code-row">
+                    <div class="input-wrap">
+                        <span class="glyphicon glyphicon-picture"></span>
+                        {{ form.code }}
+                    </div>
+                    <img id="image_code" src="/image/code/" title="点击刷新">
+                </div>
+                <span class="err">{{ form.code.errors.0 }}</span>
+            </div>
+            <button type="submit" class="btn-login">登 录</button>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script>
+    // 点击验证码图片刷新（加随机数避免缓存）
+    $(function () {
+        $('#image_code').click(function () {
+            var oldSrc = $(this).attr('src').split('?')[0];
+            $(this).attr('src', oldSrc + '?t=' + Math.random());
+        });
+    });
+</script>
+</body>
+</html>

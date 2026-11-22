@@ -1,0 +1,169 @@
+{% load static %}
+{% load rbac %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>企业员工管理系统</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-3.4.1/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    {% block css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ============ 左侧侧边栏 ============ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-logo"><span class="glyphicon glyphicon-briefcase"></span></span>
+            <span class="brand-text">员工管理系统</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                {% has_perm request 'admin_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/admin/' in request.path %}active{% endif %}">
+                    <a href="/admin/list/"><span class="glyphicon glyphicon-user"></span><span class="nav-label">管理员管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'role_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/role/' in request.path %}active{% endif %}">
+                    <a href="/role/list/"><span class="glyphicon glyphicon-king"></span><span class="nav-label">角色管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'perm_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/perm/' in request.path %}active{% endif %}">
+                    <a href="/perm/list/"><span class="glyphicon glyphicon-lock"></span><span class="nav-label">权限管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'depart_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/depart/' in request.path %}active{% endif %}">
+                    <a href="/depart/list/"><span class="glyphicon glyphicon-th"></span><span class="nav-label">部门管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'user_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/user/' in request.path %}active{% endif %}">
+                    <a href="/user/list/"><span class="glyphicon glyphicon-education"></span><span class="nav-label">用户管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'pretty_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/pretty/' in request.path %}active{% endif %}">
+                    <a href="/pretty/list/"><span class="glyphicon glyphicon-phone"></span><span class="nav-label">靓号管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'attend_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/attend/' in request.path %}active{% endif %}">
+                    <a href="/attend/list/"><span class="glyphicon glyphicon-time"></span><span class="nav-label">考勤管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'salary_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/salary/' in request.path %}active{% endif %}">
+                    <a href="/salary/list/"><span class="glyphicon glyphicon-yen"></span><span class="nav-label">薪资管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'ann_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/ann/' in request.path %}active{% endif %}">
+                    <a href="/ann/list/"><span class="glyphicon glyphicon-bullhorn"></span><span class="nav-label">公告管理</span></a>
+                </li>
+                {% endif %}
+
+                {% has_perm request 'task_view' as p %}
+                {% if p %}
+                <li class="nav-item {% if '/task/' in request.path %}active{% endif %}">
+                    <a href="/task/list/"><span class="glyphicon glyphicon-tasks"></span><span class="nav-label">任务管理</span></a>
+                </li>
+                {% endif %}
+
+                <!-- AI 智能助手：登录即可见，不依赖权限码（新增） -->
+                <li class="nav-item {% if '/ai/' in request.path %}active{% endif %}">
+                    <a href="/ai/"><span class="glyphicon glyphicon-send"></span><span class="nav-label">AI 智能助手</span></a>
+                </li>
+
+                <!-- 9.md 第17/18/19/20/21 章新增功能入口（登录即可见，纯增添） -->
+                <li class="nav-item {% if '/order/' in request.path %}active{% endif %}">
+                    <a href="/order/list/"><span class="glyphicon glyphicon-shopping-cart"></span><span class="nav-label">订单管理</span></a>
+                </li>
+                <li class="nav-item {% if '/chart/' in request.path %}active{% endif %}">
+                    <a href="/chart/list/"><span class="glyphicon glyphicon-stats"></span><span class="nav-label">数据统计</span></a>
+                </li>
+                <li class="nav-item {% if request.path == '/upload/list/' %}active{% endif %}">
+                    <a href="/upload/list/"><span class="glyphicon glyphicon-upload"></span><span class="nav-label">原始上传</span></a>
+                </li>
+                <li class="nav-item {% if request.path == '/upload/form/' %}active{% endif %}">
+                    <a href="/upload/form/"><span class="glyphicon glyphicon-picture"></span><span class="nav-label">Form上传</span></a>
+                </li>
+                <li class="nav-item {% if request.path == '/upload/modal/form/' %}active{% endif %}">
+                    <a href="/upload/modal/form/"><span class="glyphicon glyphicon-file"></span><span class="nav-label">ModelForm上传</span></a>
+                </li>
+                <li class="nav-item {% if request.path == '/tt/' %}active{% endif %}">
+                    <a href="/tt/"><span class="glyphicon glyphicon-camera"></span><span class="nav-label">头像预览</span></a>
+                </li>
+                <li class="nav-item {% if '/city/' in request.path %}active{% endif %}">
+                    <a href="/city/list/"><span class="glyphicon glyphicon-globe"></span><span class="nav-label">城市列表</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-box">
+                <span class="user-avatar"><span class="glyphicon glyphicon-user"></span></span>
+                <div class="user-meta">
+                    <div class="user-name">{{ request.session.info.username }}</div>
+                    <a href="/logout/" class="logout-link">
+                        <span class="glyphicon glyphicon-log-out"></span> 注销登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 移动端遮罩 -->
+    <div class="sidebar-backdrop" id="backdrop"></div>
+
+    <!-- ============ 右侧主内容 ============ -->
+    <main class="main-area">
+        <header class="topbar">
+            <button type="button" class="menu-toggle" id="menuToggle">
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+            </button>
+            <span class="topbar-title">企业员工管理系统</span>
+        </header>
+
+        <div class="content-wrap">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
+    <script>
+        $(function () {
+            // 移动端：汉堡按钮打开 / 遮罩关闭
+            $('#menuToggle').on('click', function () {
+                $('body').addClass('sidebar-open');
+            });
+            $('#backdrop').on('click', function () {
+                $('body').removeClass('sidebar-open');
+            });
+        });
+    </script>
+    {% block js %}{% endblock %}
+</body>
+</html>

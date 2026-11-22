@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+{% load rbac %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    {% has_perm request 'attend_add' as can_add %}
+    {% if can_add %}
+    <a href="/attend/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus"></span> 考勤登记
+    </a>
+    {% endif %}
+    <form class="form-inline pull-right" method="get">
+        <div class="form-group">
+            <input type="text" class="form-control" name="q" placeholder="按员工姓名" value="{{ q }}">
+        </div>
+        <button type="submit" class="btn btn-default">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+    </form>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">考勤记录</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>员工</th>
+                <th>考勤日期</th>
+                <th>上班打卡</th>
+                <th>下班打卡</th>
+                <th>状态</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.user.name }}</td>
+                <td>{{ obj.att_date }}</td>
+                <td>{{ obj.check_in|date:"Y-m-d H:i"|default:"-" }}</td>
+                <td>{{ obj.check_out|date:"Y-m-d H:i"|default:"-" }}</td>
+                <td>{{ obj.get_status_display }}</td>
+                <td>{{ obj.note|default:"-" }}</td>
+                <td>
+                    {% has_perm request 'attend_edit' as can_edit %}
+                    {% if can_edit %}
+                    <a href="/attend/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    {% endif %}
+                    {% has_perm request 'attend_delete' as can_delete %}
+                    {% if can_delete %}
+                    <a href="/attend/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        {{ page_html }}
+    </div>
+</div>
+{% endblock %}

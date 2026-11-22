@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+{% load rbac %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    {% has_perm request 'ann_add' as can_add %}
+    {% if can_add %}
+    <a href="/ann/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-bullhorn"></span> 发布公告
+    </a>
+    {% endif %}
+    <form class="form-inline pull-right" method="get">
+        <div class="form-group">
+            <input type="text" class="form-control" name="q" placeholder="按标题搜索" value="{{ q }}">
+        </div>
+        <button type="submit" class="btn btn-default">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+    </form>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">公告列表</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>标题</th>
+                <th>内容摘要</th>
+                <th>发布人</th>
+                <th>置顶</th>
+                <th>发布时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>
+                    {% if obj.is_top %}
+                    <span class="label label-danger">置顶</span>
+                    {% endif %}
+                    {{ obj.title }}
+                </td>
+                <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    {{ obj.content }}
+                </td>
+                <td>{{ obj.publisher.username|default:"-" }}</td>
+                <td>{{ obj.is_top|yesno:"是,否" }}</td>
+                <td>{{ obj.publish_time|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% has_perm request 'ann_edit' as can_edit %}
+                    {% if can_edit %}
+                    <a href="/ann/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    {% endif %}
+                    {% has_perm request 'ann_delete' as can_delete %}
+                    {% if can_delete %}
+                    <a href="/ann/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        {{ page_html }}
+    </div>
+</div>
+{% endblock %}

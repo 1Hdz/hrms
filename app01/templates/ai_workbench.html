@@ -1,0 +1,193 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block css %}
+<style>
+    .ai-header { margin-bottom: 18px; }
+    .ai-header h2 { margin: 0 0 6px; font-size: 24px; color: #1f3b6b; }
+    .ai-header p { margin: 0; color: #7a879c; font-size: 14px; }
+
+    .ai-card { background: #fff; border-radius: 10px; box-shadow: 0 4px 18px rgba(31, 59, 107, .08); overflow: hidden; }
+    .ai-tabs { display: flex; background: #f4f7fc; border-bottom: 1px solid #e6ecf5; }
+    .ai-tabs button {
+        flex: 1; padding: 16px 8px; border: none; background: transparent; font-size: 15px;
+        color: #5a6b85; cursor: pointer; transition: all .2s; border-bottom: 3px solid transparent;
+    }
+    .ai-tabs button .tab-ico { margin-right: 6px; }
+    .ai-tabs button.active { color: #2563eb; background: #fff; border-bottom-color: #2563eb; font-weight: 600; }
+    .ai-tabs button:hover { color: #2563eb; }
+
+    .ai-body { padding: 24px; }
+    .ai-pane { display: none; }
+    .ai-pane.active { display: block; }
+
+    .field-label { font-size: 13px; color: #44506a; font-weight: 600; margin-bottom: 8px; display: block; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .input-row .form-control { flex: 1; min-width: 180px; border-radius: 8px; }
+    .btn-ai { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border: none;
+              border-radius: 8px; padding: 10px 22px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+    .btn-ai:hover { opacity: .92; color: #fff; }
+    .btn-ai:disabled { opacity: .55; cursor: wait; }
+
+    .result-box {
+        margin-top: 20px; min-height: 80px; background: #f8fafd; border: 1px solid #e6ecf5;
+        border-radius: 8px; padding: 18px; font-size: 14px; line-height: 1.8; color: #2c3a55;
+        white-space: pre-wrap; word-break: break-word;
+    }
+    .result-empty { color: #9aa7bd; }
+    .result-error { color: #dc2626; background: #fef2f2; border-color: #fecaca; }
+
+    .loading-dots { display: inline-flex; gap: 5px; align-items: center; color: #2563eb; }
+    .loading-dots span {
+        width: 8px; height: 8px; border-radius: 50%; background: #2563eb;
+        animation: blink 1.2s infinite ease-in-out both;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: .2s; }
+    .loading-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+    .hint-text { font-size: 12px; color: #9aa7bd; margin-top: 8px; }
+    select.form-control, input[type="month"] { max-width: 260px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:none">{% csrf_token %}</div>
+<div class="ai-header">
+    <h2>AI 智能助手</h2>
+    <p>调用大模型 API，提供招聘 JD 生成、制度问答、数据点评三个智能功能</p>
+</div>
+
+<div class="ai-card">
+    <div class="ai-tabs">
+        <button type="button" class="active" data-pane="pane-jd"><span class="glyphicon glyphicon-bullhorn tab-ico"></span>招聘 JD 生成</button>
+        <button type="button" data-pane="pane-kb"><span class="glyphicon glyphicon-question-sign tab-ico"></span>制度知识库问答</button>
+        <button type="button" data-pane="pane-dc"><span class="glyphicon glyphicon-stats tab-ico"></span>数据智能点评</button>
+    </div>
+
+    <div class="ai-body">
+        <!-- T2 招聘 JD -->
+        <div class="ai-pane active" id="pane-jd">
+            <label class="field-label">岗位名称</label>
+            <div class="input-row">
+                <input type="text" class="form-control" id="jd-input" placeholder="例如：Python 后端工程师、行政专员">
+                <button class="btn-ai" id="jd-btn" onclick="askJD()">生成 JD</button>
+            </div>
+            <div class="hint-text">将输出：岗位职责 / 任职要求 / 薪资范围</div>
+            <div class="result-box result-empty" id="jd-result">结果将显示在这里</div>
+        </div>
+
+        <!-- T3 知识库问答 -->
+        <div class="ai-pane" id="pane-kb">
+            <label class="field-label">请输入关于公司制度的问题</label>
+            <div class="input-row">
+                <input type="text" class="form-control" id="kb-input" placeholder="例如：年假有几天？迟到怎么算？">
+                <button class="btn-ai" id="kb-btn" onclick="askKB()">提问</button>
+            </div>
+            <div class="hint-text">仅依据制度库回答；资料中没有的内容会回答“不知道”</div>
+            <div class="result-box result-empty" id="kb-result">结果将显示在这里</div>
+        </div>
+
+        <!-- T4 数据点评 -->
+        <div class="ai-pane" id="pane-dc">
+            <label class="field-label">选择员工与月份</label>
+            <div class="input-row">
+                <select class="form-control" id="dc-user">
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="month" class="form-control" id="dc-month" value="2026-11">
+                <button class="btn-ai" id="dc-btn" onclick="askComment()">生成点评</button>
+            </div>
+            <div class="hint-text">将读取该员工当月考勤与薪资数据，输出点评与改进建议</div>
+            <div class="result-box result-empty" id="dc-result">结果将显示在这里</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+(function () {
+    // 标签切换
+    document.querySelectorAll('.ai-tabs button').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.ai-tabs button').forEach(function (b) { b.classList.remove('active'); });
+            document.querySelectorAll('.ai-pane').forEach(function (p) { p.classList.remove('active'); });
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.pane).classList.add('active');
+        });
+    });
+})();
+
+function csrfToken() {
+    // 只用页面渲染的 64 字符 token；cookie 里的 32 字符只是 secret，不能直接当请求头，否则报 incorrect length
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+}
+
+function loading(paneId) {
+    $('#' + paneId).removeClass('result-empty result-error')
+        .html('<span class="loading-dots"><span></span><span></span><span></span></span> AI 思考中，请稍候…');
+}
+
+function showResult(paneId, text, isError) {
+    var $box = $('#' + paneId).removeClass('result-empty');
+    $box.toggleClass('result-error', !!isError).text(text);
+}
+
+function post(url, payload, btnId, paneId, success) {
+    var token = csrfToken();
+    if (!token) {  // 页面过期/旧标签页，DOM 里没有有效 token，提示刷新而不是发错误请求
+        showResult(paneId, '页面登录信息已过期，请按 F5 刷新页面后重试', true);
+        return;
+    }
+    var $btn = $('#' + btnId);
+    loading(paneId);
+    $btn.prop('disabled', true);
+    $.ajax({
+        url: url, type: 'POST',
+        headers: { 'X-CSRFToken': token },
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function (res) {
+            if (res.status) { success(res); }
+            else { showResult(paneId, res.error || '处理失败', true); }
+        },
+        error: function (xhr) {
+            showResult(paneId, '请求失败（HTTP ' + xhr.status + '）', true);
+        },
+        complete: function () { $btn.prop('disabled', false); }
+    });
+}
+
+// T2
+function askJD() {
+    var job = $('#jd-input').val().trim();
+    if (!job) { showResult('jd-result', '请输入岗位名称', true); return; }
+    post('/ai/jd/', { job_title: job }, 'jd-btn', 'jd-result',
+        function (res) { showResult('jd-result', res.answer); });
+}
+
+// T3
+function askKB() {
+    var q = $('#kb-input').val().trim();
+    if (!q) { showResult('kb-result', '请输入问题', true); return; }
+    post('/ai/knowledge/', { question: q }, 'kb-btn', 'kb-result',
+        function (res) { showResult('kb-result', res.answer); });
+}
+
+// T4
+function askComment() {
+    var uid = $('#dc-user').val();
+    var month = $('#dc-month').val();
+    post('/ai/comment/', { user_id: uid, month: month }, 'dc-btn', 'dc-result',
+        function (res) { showResult('dc-result', res.answer); });
+}
+
+// 回车即发送
+$('#jd-input').on('keydown', function (e) { if (e.key === 'Enter') askJD(); });
+$('#kb-input').on('keydown', function (e) { if (e.key === 'Enter') askKB(); });
+</script>
+{% endblock %}

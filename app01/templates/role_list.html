@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% load rbac %}
+
+{% block content %}
+<div style="margin-bottom: 10px;">
+    {% has_perm request 'role_add' as can_add %}
+    {% if can_add %}
+    <a href="/role/add/" class="btn btn-success">
+        <span class="glyphicon glyphicon-plus"></span> 新建角色
+    </a>
+    {% endif %}
+    <form class="form-inline pull-right" method="get">
+        <div class="form-group">
+            <input type="text" class="form-control" name="q" placeholder="角色名称" value="{{ q }}">
+        </div>
+        <button type="submit" class="btn btn-default">
+            <span class="glyphicon glyphicon-search"></span>
+        </button>
+    </form>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">角色列表</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>角色名称</th>
+                <th>角色编码</th>
+                <th>描述</th>
+                <th>权限数量</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in queryset %}
+            <tr>
+                <td>{{ obj.id }}</td>
+                <td>{{ obj.name }}</td>
+                <td>{{ obj.code }}</td>
+                <td>{{ obj.description|default:"-" }}</td>
+                <td>{{ obj.permissions.count }}</td>
+                <td>
+                    {% has_perm request 'role_edit' as can_edit %}
+                    {% if can_edit %}
+                    <a href="/role/{{ obj.id }}/edit/" class="btn btn-primary btn-xs">编辑</a>
+                    {% endif %}
+                    {% has_perm request 'role_delete' as can_delete %}
+                    {% if can_delete %}
+                    <a href="/role/{{ obj.id }}/delete/" class="btn btn-danger btn-xs"
+                       onclick="return confirm('确定删除？')">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="text-align: center;">
+        {{ page_html }}
+    </div>
+</div>
+{% endblock %}
